@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MKtv — Shader Edition (Vibrant, Preto) — Corrigido Final</title>
+  <style>
+    :root{--bg:#000;--accent:#ff2b2b;--accent2:#ff6b6b;--text:#f7f7f7}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text);}
+
+    .container{position:relative;display:flex;flex-direction:column;min-height:100vh;z-index:1}
+    header{display:flex;align-items:center;gap:12px;padding:18px 24px;}
+    header img{width:68px;height:68px;border-radius:12px;box-shadow:0 18px 60px rgba(255,43,43,0.12)}
+    header h1{margin:0;font-size:22px;color:var(--accent);text-shadow:0 12px 40px rgba(255,43,43,0.35);filter:drop-shadow(0 10px 30px rgba(255,43,43,0.25));}
+    header .sub{color:#d3d3d3;font-size:13px;text-shadow:0 6px 18px rgba(255,43,43,0.06)}
+
+    main{display:flex;gap:18px;padding:18px;align-items:flex-start}
+    .player-area{flex:2;min-width:360px}
+
+    .viewport{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,0.85), inset 0 0 160px rgba(255,43,43,0.02);border:1px solid rgba(255,255,255,0.02)}
+    #player{width:100%;aspect-ratio:16/9;background:#000}
+    #shaderCanvas{position:absolute;inset:10px;border-radius:10px;pointer-events:none}
+
+    .controls{display:flex;align-items:center;gap:12px;padding:12px 6px}
+    .title{font-weight:900;font-size:18px;color:var(--text);text-shadow:0 14px 50px rgba(255,43,43,0.45);filter:drop-shadow(0 8px 40px rgba(255,43,43,0.25));}
+    .controls .pill{margin-left:auto;background:linear-gradient(90deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:999px;font-weight:900;color:#050505;text-shadow:0 8px 24px rgba(0,0,0,0.6);box-shadow:0 20px 60px rgba(255,43,43,0.12)}
+
+    aside{width:360px;max-height:70vh;overflow:auto;padding:12px;border-radius:12px;background:transparent;border:1px solid rgba(255,255,255,0.02)}
+    .season-title{font-size:13px;color:var(--accent);font-weight:900;margin-bottom:10px;text-shadow:0 10px 30px rgba(255,43,43,0.2)}
+
+    .episode{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+    .episode:hover{transform:translateX(6px);box-shadow:0 18px 60px rgba(0,0,0,0.8)}
+
+    .thumb{width:140px;height:78px;border-radius:8px;overflow:hidden;position:relative;flex:0 0 140px;border:1px solid rgba(255,43,43,0.06);box-shadow:0 10px 30px rgba(255,43,43,0.06)}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.05) saturate(1.2)}
+    .thumb .watched{position:absolute;right:8px;bottom:8px;background:linear-gradient(90deg,#7cffb0,#2bd36b);color:#03120a;padding:6px 8px;border-radius:999px;font-weight:900;font-size:12px;box-shadow:0 10px 40px rgba(43,211,107,0.12);}
+
+    .ep-meta{flex:1;display:flex;flex-direction:column;gap:6px}
+    .ep-title{font-weight:900;color:var(--text);font-size:15px;text-shadow:0 14px 40px rgba(255,43,43,0.45);filter:drop-shadow(0 8px 40px rgba(255,43,43,0.18))}
+    .ep-sub{font-size:12px;color:#bfbfbf}
+
+    .ep-number{width:46px;height:46px;border-radius:10px;background:linear-gradient(180deg,rgba(255,20,20,0.06),rgba(255,43,43,0.02));display:grid;place-items:center;font-weight:900;color:var(--accent);border:1px solid rgba(255,255,255,0.03);text-shadow:0 8px 30px rgba(255,43,43,0.25)}
+
+    .glow{box-shadow:0 0 60px rgba(255,43,43,0.12), inset 0 0 120px rgba(255,43,43,0.02)}
+
+    footer{padding:14px 20px;color:#bfbfbf}
+
+    .header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.05);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:800}
+
+    @media(max-width:980px){aside{width:100%;max-height:none}main{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img id="cover-img" src="cover.jpg" alt="MKtv Cover" onerror="this.style.display='none'">
+      <div>
+        <h1>MKtv — Vibrant Preto (Corrigido Final)</h1>
+        <div class="sub">Removi a mancha e deixei um controle pra desligar os shaders.</div>
+      </div>
+      <div class="header-actions">
+        <button id="toggleShaders" class="btn">Desligar shaders</button>
+        <div class="pill">Temporada 1</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="player-area">
+        <div class="viewport glow">
+          <div id="player"></div>
+          <canvas id="shaderCanvas"></canvas>
+        </div>
+        <div class="controls">
+          <div class="title" id="current-title">Carregando...</div>
+          <div class="pill">Visual: Vibrante</div>
+        </div>
+      </section>
+
+      <aside>
+        <div class="season-title">Episódios — Temporada 1</div>
+        <div id="episodeList">
+          <div style="color:#bbb">Carregando episódios da playlist...</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>MKtv — Fundo preto. Letras brilhantes. Mancha vermelha removida. Use o botão se precisar.</footer>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    const PLAYLIST_ID = 'PLWB8Pegl4PbtEelQSECBjiehDNUBoXtCj';
+    let player;
+    function onYouTubeIframeAPIReady(){
+      player = new YT.Player('player',{height:'360',width:'640',playerVars:{listType:'playlist',list:PLAYLIST_ID,rel:0,controls:1,modestbranding:1},events:{onReady:onPlayerReady,onStateChange:onPlayerStateChange}});
+    }
+    function onPlayerReady(){ buildEpisodeListFromPlayer(); updateCurrentTitle(); setInterval(syncPlaylist,800); }
+    function onPlayerStateChange(e){ if(e.data==YT.PlayerState.PLAYING){ markWatchedCurrent(); } setTimeout(updateCurrentTitle,300); }
+    function updateCurrentTitle(){ if(!player) return; try{ const info = player.getVideoData(); document.getElementById('current-title').textContent = info && info.title ? info.title : 'Título indisponível'; }catch(e){} }
+
+    const STORAGE_KEY = 'mktv_watched_v1';
+    function readWatched(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); }catch(e){ return {}; } }
+    function writeWatched(obj){ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
+    function markWatched(videoId){ const w = readWatched(); w[videoId]=true; writeWatched(w); renderWatchedStates(); }
+    function markWatchedCurrent(){ try{ const id = player.getVideoData().video_id; if(id) markWatched(id); }catch(e){} }
+
+    async function buildEpisodeListFromPlayer(){ let ids = []; try{ ids = player.getPlaylist() || []; }catch(e){ ids = []; }
+      if(!ids || ids.length===0){ setTimeout(buildEpisodeListFromPlayer,700); return; }
+      const container = document.getElementById('episodeList'); container.innerHTML = '';
+      for(let i=0;i<ids.length;i++){ const vid = ids[i]; const ep = createEpisodeElement(i+1, vid); container.appendChild(ep); fetchTitle(vid).then(title=>{ const t = ep.querySelector('.ep-title'); if(t && title) t.textContent = title; }); }
+      renderWatchedStates(); }
+
+    function syncPlaylist(){ try{ const ids = player.getPlaylist() || []; const list = document.getElementById('episodeList'); if(!list) return; if(ids.length!==list.children.length){ buildEpisodeListFromPlayer(); } }catch(e){} }
+
+    function createEpisodeElement(number, videoId){ const wrap = document.createElement('div'); wrap.className='episode';
+      wrap.innerHTML = `
+        <div class='thumb'><img src='https://i.ytimg.com/vi/${videoId}/hqdefault.jpg' alt='thumb'><div class='watched' style='display:none'>✓ VISTO</div></div>
+        <div class='ep-meta'><div class='ep-title'>Episódio ${number}</div></div>
+        <div class='ep-number'>${number}</div>`;
+      wrap.addEventListener('click',()=>{ try{ player.loadVideoById(videoId); markWatched(videoId); }catch(e){ player.playVideo(); } });
+      return wrap; }
+
+    async function fetchTitle(videoId){ try{ const u = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`; const res = await fetch(u); if(!res.ok) throw new Error('no'); const j = await res.json(); return j.title; }catch(e){ return null; } }
+
+    function renderWatchedStates(){ const w = readWatched(); const items = document.querySelectorAll('#episodeList .episode'); items.forEach(item=>{ const img = item.querySelector('.thumb img'); const vid = img ? extractVideoIdFromThumb(img.src) : null; const badge = item.querySelector('.thumb .watched'); if(vid && w[vid]){ if(badge) badge.style.display='block'; item.style.opacity = '0.86'; } else { if(badge) badge.style.display='none'; item.style.opacity = '1'; } }); }
+    function extractVideoIdFromThumb(src){ const m = src.match(/vi\/([^\/]+)\/hqdefault/); return m?m[1]:null; }
+    window.addEventListener('beforeunload', ()=>{ markWatchedCurrent(); });
+
+    // --- SHADERS FIXED ---
+    const canvas = document.getElementById('shaderCanvas'); const gl = canvas.getContext('webgl');
+    let shaderEnabled = true;
+
+    // toggle button hookup
+    const toggleBtn = document.getElementById('toggleShaders');
+    toggleBtn.addEventListener('click', ()=>{
+      shaderEnabled = !shaderEnabled;
+      if(!shaderEnabled){ canvas.style.transition='opacity .25s'; canvas.style.opacity = '0'; setTimeout(()=>{ canvas.style.display='none'; },260); toggleBtn.textContent = 'Ativar shaders'; }
+      else { canvas.style.display = 'block'; canvas.style.opacity='0'; setTimeout(()=>{ canvas.style.opacity='1'; },20); toggleBtn.textContent = 'Desligar shaders'; }
+    });
+
+    function resizeCanvas(){ const rect = document.getElementById('player').getBoundingClientRect(); canvas.width = Math.max(1,Math.floor(rect.width-20)); canvas.height = Math.max(1,Math.floor(rect.height-20)); canvas.style.left = (rect.left+10)+'px'; canvas.style.top = (rect.top+10)+'px'; canvas.style.width = (rect.width-20)+'px'; canvas.style.height = (rect.height-20)+'px'; }
+    window.addEventListener('resize',()=>{ resizeCanvas(); }); setTimeout(resizeCanvas,300);
+    if(!gl){ canvas.style.display='none'; console.warn('WebGL não disponível — shaders desativados'); }
+
+    // shader sources: output with alpha and enable blending to avoid opaque hotspot
+    const vs = `attribute vec2 position; varying vec2 vUv; void main(){ vUv = position*0.5+0.5; gl_Position = vec4(position,0.0,1.0); }`;
+    const fs = `precision mediump float; varying vec2 vUv; uniform float iTime; uniform vec2 iResolution;
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123); }
+      float noise(vec2 p){ vec2 i=floor(p); vec2 f=fract(p); float a=hash(i), b=hash(i+vec2(1.0,0.0)), c=hash(i+vec2(0.0,1.0)), d=hash(i+vec2(1.0,1.0)); vec2 u=f*f*(3.0-2.0*f); return mix(a,b,u.x)+ (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y; }
+      void main(){ vec2 uv=vUv; float t=iTime*0.5; float n=noise(uv*6.0 + t*0.4);
+        vec3 base = vec3(0.0);
+        float dist = length(uv-vec2(0.5,0.5));
+        // much softer, wider glow
+        float gfall = smoothstep(0.9,0.0,dist); // inverse smoothstep for soft falloff
+        float puls = 0.35 + 0.2*sin(t*1.2 + uv.x*4.0);
+        vec3 glow = vec3(1.0,0.17,0.12) * gfall * 0.06 * puls * (0.5 + n*0.4);
+        vec3 col = base + glow;
+        // tiny chroma
+        col.r += n*0.01; col.g += n*0.005; col.b += n*0.0025;
+        // very faint scanlines
+        float scan = 0.5 + 0.5*sin((uv.y*iResolution.y*0.35 + t*30.0));
+        col *= 1.0 - 0.006*(1.0-scan);
+        // compute alpha from intensity but keep it low
+        float luminance = dot(col, vec3(0.299,0.587,0.114));
+        float alpha = smoothstep(0.02, 0.35, luminance) * 0.28; // max ~0.28 alpha
+        col = clamp(col, 0.0, 0.8);
+        gl_FragColor = vec4(col, alpha);
+      }`;
+
+    function createShader(gl,type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; } return s; }
+    function createProgram(gl,vsSrc,fsSrc){ const vsS=createShader(gl,gl.VERTEX_SHADER,vsSrc); const fsS=createShader(gl,gl.FRAGMENT_SHADER,fsSrc); const p=gl.createProgram(); gl.attachShader(p,vsS); gl.attachShader(p,fsS); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(p)); return null; } return p; }
+
+    let program, posLoc, timeLoc, resLoc;
+    if(gl){
+      // enable alpha blending so shader is overlay, not opaque
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+      program = createProgram(gl,vs,fs);
+      const posBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,posBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+      posLoc = gl.getAttribLocation(program,'position'); timeLoc = gl.getUniformLocation(program,'iTime'); resLoc = gl.getUniformLocation(program,'iResolution');
+      gl.useProgram(program); gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc,2,gl.FLOAT,false,0,0); gl.clearColor(0,0,0,0);
+    }
+
+    let start = performance.now()/1000;
+    function renderLoop(){ if(gl && shaderEnabled){ resizeCanvas(); gl.viewport(0,0,canvas.width,canvas.height); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(program); const t = performance.now()/1000 - start; gl.uniform1f(timeLoc, t); gl.uniform2f(resLoc, canvas.width, canvas.height); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); } requestAnimationFrame(renderLoop); }
+    requestAnimationFrame(renderLoop);
+
+    setInterval(()=>{ try{ if(player && typeof player.getPlayerState === 'function'){ const st = player.getPlayerState(); if(st==YT.PlayerState.PLAYING){ markWatchedCurrent(); } } }catch(e){} },2000);
+
+  </script>
+</body>
+</html>
