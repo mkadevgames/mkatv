@@ -5,62 +5,71 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>MKtv</title>
   <style>
-    :root{--bg:#000;--accent:#ff2b2b;--accent2:#ff6b6b;--text:#f7f7f7}
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text);}
+    :root{--bg:#000;--accent:#ff2b2b;--accent2:#ff6b6b;--text:#f7f7f7;--border:#333;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text);}
+    .container{display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1}
+    header{display:flex;align-items:center;gap:16px;padding:20px 24px;position:relative;}
+    header .logo{width:80px;height:80px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:36px;font-weight:900;color:#000;box-shadow:0 20px 70px rgba(255,43,43,0.3);}
+    header h1{font-size:28px;font-weight:900;color:var(--accent);text-shadow:0 0 20px rgba(255,43,43,0.4);}
+    .sub{font-size:14px;color:#aaa;margin-top:4px;}
+    .user-area{margin-left:auto;display:flex;align-items:center;gap:12px;}
+    .profile-img{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:24px;font-weight:900;color:#000;cursor:pointer;box-shadow:0 10px 30px rgba(255,43,43,0.2);}
+    .level-badge{background:#111;border:1px solid var(--accent);padding:4px 10px;border-radius:999px;font-size:13px;font-weight:900;}
+    .xp-bar{margin-top:4px;height:4px;width:120px;background:#222;border-radius:2px;overflow:hidden;}
+    .xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease;border-radius:2px;}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;transition:all .2s;}
+    .btn:hover{background:rgba(255,43,43,0.1);}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;z-index:100;}
+    .modal-content{background:#111;padding:32px;border-radius:16px;width:380px;max-width:90%;box-shadow:0 40px 100px rgba(255,43,43,0.2);}
+    .modal h2{color:var(--accent);margin-bottom:20px;text-align:center;font-size:24px;}
+    input[type=text],input[type=password]{width:100%;padding:12px;margin-bottom:16px;background:#222;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;}
+    .modal .btn{width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#000;font-weight:900;margin-top:8px;}
+    .close{cursor:pointer;position:absolute;top:12px;right:16px;font-size:24px;color:#aaa;}
 
-    .container{position:relative;display:flex;flex-direction:column;min-height:100vh;z-index:1}
-    header{display:flex;align-items:center;gap:12px;padding:18px 24px;}
-    header img{width:68px;height:68px;border-radius:12px;box-shadow:0 18px 60px rgba(255,43,43,0.12)}
-    header h1{margin:0;font-size:22px;color:var(--accent);text-shadow:0 12px 40px rgba(255,43,43,0.35);filter:drop-shadow(0 10px 30px rgba(255,43,43,0.25));}
-    header .sub{color:#d3d3d3;font-size:13px;text-shadow:0 6px 18px rgba(255,43,43,0.06)}
+    main{display:flex;gap:24px;padding:0 24px 24px;align-items:flex-start;flex:1;}
+    .player-area{flex:2;min-width:360px;}
+    .viewport{position:relative;border-radius:18px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.9), inset 0 0 200px rgba(255,43,43,0.03);border:1px solid rgba(255,255,255,0.03);}
+    #player{width:100%;aspect-ratio:16/9;background:#000;}
+    #shaderCanvas{position:absolute;inset:12px;border-radius:12px;pointer-events:none;opacity:0.9;}
 
-    main{display:flex;gap:18px;padding:18px;align-items:flex-start}
-    .player-area{flex:2;min-width:360px}
+    .controls{display:flex;align-items:center;gap:16px;padding:16px 8px;}
+    .title{font-weight:900;font-size:20px;color:var(--text);text-shadow:0 0 30px rgba(255,43,43,0.3);}
+    .pill{background:linear-gradient(90deg,var(--accent),var(--accent2));padding:10px 16px;border-radius:999px;font-weight:900;color:#000;box-shadow:0 20px 60px rgba(255,43,43,0.15);}
 
-    .viewport{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,0.85), inset 0 0 160px rgba(255,43,43,0.02);border:1px solid rgba(255,255,255,0.02)}
-    #player{width:100%;aspect-ratio:16/9;background:#000}
-    #shaderCanvas{position:absolute;inset:10px;border-radius:10px;pointer-events:none}
+    aside{width:380px;max-height:80vh;overflow-y:auto;padding:16px;border-radius:16px;background:rgba(20,20,20,0.4);border:1px solid rgba(255,255,255,0.05);backdrop-filter:blur(10px);}
+    .season-title{font-size:15px;color:var(--accent);font-weight:900;margin-bottom:16px;text-shadow:0 0 20px rgba(255,43,43,0.3);}
+    .episode{display:flex;gap:16px;align-items:center;padding:14px;border-radius:14px;cursor:pointer;transition:all .2s ease;background:rgba(0,0,0,0.3);}
+    .episode:hover{transform:translateX(8px);background:rgba(255,43,43,0.08);box-shadow:0 20px 70px rgba(0,0,0,0.7);}
+    .episode.active{background:rgba(255,43,43,0.15);border-left:4px solid var(--accent);}
+    .thumb{width:160px;height:90px;border-radius:10px;overflow:hidden;position:relative;border:1px solid rgba(255,43,43,0.1);box-shadow:0 12px 40px rgba(255,43,43,0.1);}
+    .thumb img{width:100%;height:100%;object-fit:cover;filter:brightness(1.05) saturate(1.15);}
+    .thumb .watched{position:absolute;right:8px;bottom:8px;background:linear-gradient(90deg,#2bd36b,#7cffb0);color:#000;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;box-shadow:0 10px 40px rgba(43,211,107,0.2);}
+    .ep-meta{flex:1;display:flex;flex-direction:column;gap:8px;}
+    .ep-title{font-weight:900;color:var(--text);font-size:16px;}
+    .ep-sub{font-size:13px;color:#aaa;}
+    .ep-number{width:50px;height:50px;border-radius:12px;background:linear-gradient(180deg,rgba(255,43,43,0.1),rgba(255,43,43,0.05));display:grid;place-items:center;font-weight:900;color:var(--accent);font-size:18px;border:1px solid rgba(255,255,255,0.05);}
 
-    .controls{display:flex;align-items:center;gap:12px;padding:12px 6px}
-    .title{font-weight:900;font-size:18px;color:var(--text);text-shadow:0 14px 50px rgba(255,43,43,0.45);filter:drop-shadow(0 8px 40px rgba(255,43,43,0.25));}
-    .controls .pill{margin-left:auto;background:linear-gradient(90deg,var(--accent),var(--accent2));padding:8px 12px;border-radius:999px;font-weight:900;color:#050505;text-shadow:0 8px 24px rgba(0,0,0,0.6);box-shadow:0 20px 60px rgba(255,43,43,0.12)}
+    footer{padding:20px;text-align:center;color:#888;font-size:14px;}
 
-    aside{width:360px;max-height:70vh;overflow:auto;padding:12px;border-radius:12px;background:transparent;border:1px solid rgba(255,255,255,0.02)}
-    .season-title{font-size:13px;color:var(--accent);font-weight:900;margin-bottom:10px;text-shadow:0 10px 30px rgba(255,43,43,0.2)}
-
-    .episode{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
-    .episode:hover{transform:translateX(6px);box-shadow:0 18px 60px rgba(0,0,0,0.8)}
-
-    .thumb{width:140px;height:78px;border-radius:8px;overflow:hidden;position:relative;flex:0 0 140px;border:1px solid rgba(255,43,43,0.06);box-shadow:0 10px 30px rgba(255,43,43,0.06)}
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.05) saturate(1.2)}
-    .thumb .watched{position:absolute;right:8px;bottom:8px;background:linear-gradient(90deg,#7cffb0,#2bd36b);color:#03120a;padding:6px 8px;border-radius:999px;font-weight:900;font-size:12px;box-shadow:0 10px 40px rgba(43,211,107,0.12);}
-
-    .ep-meta{flex:1;display:flex;flex-direction:column;gap:6px}
-    .ep-title{font-weight:900;color:var(--text);font-size:15px;text-shadow:0 14px 40px rgba(255,43,43,0.45);filter:drop-shadow(0 8px 40px rgba(255,43,43,0.18))}
-    .ep-sub{font-size:12px;color:#bfbfbf}
-
-    .ep-number{width:46px;height:46px;border-radius:10px;background:linear-gradient(180deg,rgba(255,20,20,0.06),rgba(255,43,43,0.02));display:grid;place-items:center;font-weight:900;color:var(--accent);border:1px solid rgba(255,255,255,0.03);text-shadow:0 8px 30px rgba(255,43,43,0.25)}
-
-    .glow{box-shadow:0 0 60px rgba(255,43,43,0.12), inset 0 0 120px rgba(255,43,43,0.02)}
-
-    footer{padding:14px 20px;color:#bfbfbf}
-
-    .header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
-    .btn{background:transparent;border:1px solid rgba(255,255,255,0.05);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:800}
-
-    @media(max-width:980px){aside{width:100%;max-height:none}main{flex-direction:column}}
+    @media(max-width:980px){main{flex-direction:column;}aside{width:100%;max-height:none;}}
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <img id="cover-img" src="cover.jpg" alt="MKtv Cover" onerror="this.style.display='none'">
+      <div class="logo">MK</div>
       <div>
-        <h1>MKtv Sua TV mka-11</h1>
-        <div class="sub">Removido a mancha e deixei um controle pra desligar os shaders.</div>
+        <h1>MKtv</h1>
+        <div class="sub">Sua TV mka-11 • Broken Word</div>
       </div>
-      <div class="header-actions">
+      <div class="user-area">
+        <div class="profile-img" id="userInitial">?</div>
+        <div style="text-align:right;">
+          <div class="level-badge" id="userLevel">Nível 1</div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+        </div>
+        <button id="loginBtn" class="btn">Entrar</button>
         <button id="toggleShaders" class="btn">Desligar shaders</button>
         <div class="pill">Temporada 1</div>
       </div>
@@ -68,7 +77,7 @@
 
     <main>
       <section class="player-area">
-        <div class="viewport glow">
+        <div class="viewport">
           <div id="player"></div>
           <canvas id="shaderCanvas"></canvas>
         </div>
@@ -81,103 +90,346 @@
       <aside>
         <div class="season-title">Episódios — Temporada 1</div>
         <div id="episodeList">
-          <div style="color:#bbb">Carregando episódios....</div>
+          <div style="color:#bbb;text-align:center;padding:20px;">Carregando episódios...</div>
         </div>
       </aside>
     </main>
 
-    <footer>MKtv — Broken Word conta a história de um stickman consciente chamado Broken, criado por Marko, seu próprio dono. Preso à existência que lhe foi imposta, Broken passa a questionar sua criação e a relação de controle que Marko exerce sobre ele. Consumido pelo ressentimento, o protagonista inicia uma jornada de vingança contra aquele que o criou, transformando a ligação entre criador e criatura em um conflito direto, psicológico e destrutivo.</footer>
+    <footer>Broken Word conta a história de um stickman consciente chamado Broken, criado por Marko, seu próprio dono. Preso à existência que lhe foi imposta, Broken passa a questionar sua criação e a relação de controle que Marko exerce sobre ele. Consumido pelo ressentimento, o protagonista inicia uma jornada de vingança contra aquele que o criou, transformando a ligação entre criador e criatura em um conflito direto, psicológico e destrutivo.</footer>
+  </div>
+
+  <!-- Modal de Login/Criação de Conta -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="close">×</span>
+      <h2 id="modalTitle">Entrar na MKtv</h2>
+      <input type="text" id="username" placeholder="Nome de usuário" required>
+      <input type="password" id="password" placeholder="Senha" required>
+      <button id="authBtn" class="btn">Entrar</button>
+      <button id="switchMode" class="btn" style="background:transparent;margin-top:8px;">Criar conta</button>
+    </div>
   </div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     const PLAYLIST_ID = 'PLWB8Pegl4PbtEelQSECBjiehDNUBoXtCj';
-    let player;
-    function onYouTubeIframeAPIReady(){
-      player = new YT.Player('player',{height:'360',width:'640',playerVars:{listType:'playlist',list:PLAYLIST_ID,rel:0,controls:1,modestbranding:1},events:{onReady:onPlayerReady,onStateChange:onPlayerStateChange}});
+
+    let player, currentUser = null;
+    let playlistIds = []; // Armazena os IDs da playlist em ordem
+
+    // Sistema de XP e Level
+    const XP_PER_EPISODE = 100;
+    const XP_PER_LEVEL = 500;
+
+    function getUserKey() { return currentUser ? `mktv_data_${currentUser.username}` : 'mktv_data_guest'; }
+
+    function loadUserData() {
+      const key = getUserKey();
+      const saved = localStorage.getItem(key);
+      if (saved) return JSON.parse(saved);
+      return { watched: {}, xp: 0 };
     }
-    function onPlayerReady(){ buildEpisodeListFromPlayer(); updateCurrentTitle(); setInterval(syncPlaylist,800); }
-    function onPlayerStateChange(e){ if(e.data==YT.PlayerState.PLAYING){ markWatchedCurrent(); } setTimeout(updateCurrentTitle,300); }
-    function updateCurrentTitle(){ if(!player) return; try{ const info = player.getVideoData(); document.getElementById('current-title').textContent = info && info.title ? info.title : 'Título indisponível'; }catch(e){} }
 
-    const STORAGE_KEY = 'mktv_watched_v1';
-    function readWatched(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); }catch(e){ return {}; } }
-    function writeWatched(obj){ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }
-    function markWatched(videoId){ const w = readWatched(); w[videoId]=true; writeWatched(w); renderWatchedStates(); }
-    function markWatchedCurrent(){ try{ const id = player.getVideoData().video_id; if(id) markWatched(id); }catch(e){} }
+    function saveUserData(data) {
+      localStorage.setItem(getUserKey(), JSON.stringify(data));
+    }
 
-    async function buildEpisodeListFromPlayer(){ let ids = []; try{ ids = player.getPlaylist() || []; }catch(e){ ids = []; }
-      if(!ids || ids.length===0){ setTimeout(buildEpisodeListFromPlayer,700); return; }
-      const container = document.getElementById('episodeList'); container.innerHTML = '';
-      for(let i=0;i<ids.length;i++){ const vid = ids[i]; const ep = createEpisodeElement(i+1, vid); container.appendChild(ep); fetchTitle(vid).then(title=>{ const t = ep.querySelector('.ep-title'); if(t && title) t.textContent = title; }); }
-      renderWatchedStates(); }
+    function updateLevelDisplay() {
+      const data = loadUserData();
+      const level = Math.floor(data.xp / XP_PER_LEVEL) + 1;
+      const xpInLevel = data.xp % XP_PER_LEVEL;
+      const percent = (xpInLevel / XP_PER_LEVEL) * 100;
 
-    function syncPlaylist(){ try{ const ids = player.getPlaylist() || []; const list = document.getElementById('episodeList'); if(!list) return; if(ids.length!==list.children.length){ buildEpisodeListFromPlayer(); } }catch(e){} }
+      document.getElementById('userLevel').textContent = `Nível ${level}`;
+      document.getElementById('xpFill').style.width = percent + '%';
+    }
 
-    function createEpisodeElement(number, videoId){ const wrap = document.createElement('div'); wrap.className='episode';
-      wrap.innerHTML = `
-        <div class='thumb'><img src='https://i.ytimg.com/vi/${videoId}/hqdefault.jpg' alt='thumb'><div class='watched' style='display:none'>✓ VISTO</div></div>
-        <div class='ep-meta'><div class='ep-title'>Episódio ${number}</div></div>
-        <div class='ep-number'>${number}</div>`;
-      wrap.addEventListener('click',()=>{ try{ player.loadVideoById(videoId); markWatched(videoId); }catch(e){ player.playVideo(); } });
-      return wrap; }
+    function addXP(amount) {
+      const data = loadUserData();
+      data.xp += amount;
+      saveUserData(data);
+      updateLevelDisplay();
+    }
 
-    async function fetchTitle(videoId){ try{ const u = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`; const res = await fetch(u); if(!res.ok) throw new Error('no'); const j = await res.json(); return j.title; }catch(e){ return null; } }
+    // Conta
+    function loadUser() {
+      const saved = localStorage.getItem('mktv_user');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        document.getElementById('userInitial').textContent = currentUser.username[0].toUpperCase();
+        document.getElementById('loginBtn').textContent = 'Sair';
+        updateLevelDisplay();
+        renderWatchedStates();
+      }
+    }
 
-    function renderWatchedStates(){ const w = readWatched(); const items = document.querySelectorAll('#episodeList .episode'); items.forEach(item=>{ const img = item.querySelector('.thumb img'); const vid = img ? extractVideoIdFromThumb(img.src) : null; const badge = item.querySelector('.thumb .watched'); if(vid && w[vid]){ if(badge) badge.style.display='block'; item.style.opacity = '0.86'; } else { if(badge) badge.style.display='none'; item.style.opacity = '1'; } }); }
-    function extractVideoIdFromThumb(src){ const m = src.match(/vi\/([^\/]+)\/hqdefault/); return m?m[1]:null; }
-    window.addEventListener('beforeunload', ()=>{ markWatchedCurrent(); });
+    function saveUser(user) {
+      localStorage.setItem('mktv_user', JSON.stringify(user));
+      currentUser = user;
+      document.getElementById('userInitial').textContent = user.username[0].toUpperCase();
+      document.getElementById('loginBtn').textContent = 'Sair';
+      closeModal();
+      updateLevelDisplay();
+      renderWatchedStates();
+    }
 
-    // --- SHADERS FIXED ---
-    const canvas = document.getElementById('shaderCanvas'); const gl = canvas.getContext('webgl');
-    let shaderEnabled = true;
+    function logout() {
+      localStorage.removeItem('mktv_user');
+      currentUser = null;
+      document.getElementById('userInitial').textContent = '?';
+      document.getElementById('loginBtn').textContent = 'Entrar';
+      updateLevelDisplay();
+      renderWatchedStates();
+    }
 
-    // toggle button hookup
-    const toggleBtn = document.getElementById('toggleShaders');
-    toggleBtn.addEventListener('click', ()=>{
-      shaderEnabled = !shaderEnabled;
-      if(!shaderEnabled){ canvas.style.transition='opacity .25s'; canvas.style.opacity = '0'; setTimeout(()=>{ canvas.style.display='none'; },260); toggleBtn.textContent = 'Ativar shaders'; }
-      else { canvas.style.display = 'block'; canvas.style.opacity='0'; setTimeout(()=>{ canvas.style.opacity='1'; },20); toggleBtn.textContent = 'Desligar shaders'; }
+    // Watched
+    function readWatched() {
+      const data = loadUserData();
+      return data.watched || {};
+    }
+
+    function writeWatched(obj) {
+      const data = loadUserData();
+      data.watched = obj;
+      saveUserData(data);
+    }
+
+    function markWatched(videoId) {
+      const w = readWatched();
+      if (!w[videoId]) {
+        w[videoId] = true;
+        writeWatched(w);
+        addXP(XP_PER_EPISODE);
+        renderWatchedStates();
+      }
+    }
+
+    function markWatchedCurrent() {
+      try {
+        const id = player.getVideoData().video_id;
+        if (id) markWatched(id);
+      } catch {}
+    }
+
+    // Modal
+    const modal = document.getElementById('authModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const closeBtn = document.querySelector('.close');
+    const authBtn = document.getElementById('authBtn');
+    const switchBtn = document.getElementById('switchMode');
+    const modalTitle = document.getElementById('modalTitle');
+    let isLogin = true;
+
+    function closeModal() { modal.style.display = 'none'; }
+
+    loginBtn.addEventListener('click', () => {
+      if (currentUser) { logout(); return; }
+      modal.style.display = 'flex';
+    });
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    switchBtn.addEventListener('click', () => {
+      isLogin = !isLogin;
+      modalTitle.textContent = isLogin ? 'Entrar na MKtv' : 'Criar conta na MKtv';
+      authBtn.textContent = isLogin ? 'Entrar' : 'Criar';
+      switchBtn.textContent = isLogin ? 'Criar conta' : 'Já tenho conta';
     });
 
-    function resizeCanvas(){ const rect = document.getElementById('player').getBoundingClientRect(); canvas.width = Math.max(1,Math.floor(rect.width-20)); canvas.height = Math.max(1,Math.floor(rect.height-20)); canvas.style.left = (rect.left+10)+'px'; canvas.style.top = (rect.top+10)+'px'; canvas.style.width = (rect.width-20)+'px'; canvas.style.height = (rect.height-20)+'px'; }
-    window.addEventListener('resize',()=>{ resizeCanvas(); }); setTimeout(resizeCanvas,300);
-    if(!gl){ canvas.style.display='none'; console.warn('WebGL não disponível — shaders desativados'); }
+    authBtn.addEventListener('click', () => {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value;
+      if (!user || !pass) return alert('Preencha todos os campos');
 
-    // shader sources: output with alpha and enable blending to avoid opaque hotspot
+      if (isLogin) {
+        const saved = localStorage.getItem('mktv_user');
+        if (saved && JSON.parse(saved).username === user && JSON.parse(saved).password === pass) {
+          saveUser(JSON.parse(saved));
+        } else {
+          alert('Usuário ou senha incorretos');
+        }
+      } else {
+        const newUser = { username: user, password: pass };
+        saveUser(newUser);
+      }
+    });
+
+    // Player
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        playerVars: { listType: 'playlist', list: PLAYLIST_ID, rel: 0, controls: 1, modestbranding: 1 },
+        events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange }
+      });
+    }
+
+    function onPlayerReady() {
+      buildEpisodeListFromPlayer();
+      updateCurrentTitle();
+      setInterval(syncPlaylist, 1000);
+      loadUser();
+    }
+
+    function onPlayerStateChange(e) {
+      if (e.data == YT.PlayerState.PLAYING) markWatchedCurrent();
+      updateCurrentTitle();
+      highlightCurrentEpisode();
+    }
+
+    function updateCurrentTitle() {
+      if (!player) return;
+      try {
+        const info = player.getVideoData();
+        document.getElementById('current-title').textContent = info?.title || 'Título indisponível';
+      } catch {}
+    }
+
+    function highlightCurrentEpisode() {
+      try {
+        const currentId = player.getVideoData().video_id;
+        document.querySelectorAll('#episodeList .episode').forEach(ep => {
+          ep.classList.remove('active');
+          const thumbImg = ep.querySelector('.thumb img');
+          if (thumbImg && thumbImg.src.includes(currentId)) {
+            ep.classList.add('active');
+          }
+        });
+      } catch {}
+    }
+
+    async function buildEpisodeListFromPlayer() {
+      try {
+        playlistIds = player.getPlaylist() || [];
+      } catch (e) {
+        playlistIds = [];
+      }
+
+      if (playlistIds.length === 0) {
+        setTimeout(buildEpisodeListFromPlayer, 1000);
+        return;
+      }
+
+      const container = document.getElementById('episodeList');
+      container.innerHTML = '';
+
+      for (let i = 0; i < playlistIds.length; i++) {
+        const vid = playlistIds[i];
+        const ep = createEpisodeElement(i + 1, vid, i); // Passa o índice real
+        container.appendChild(ep);
+
+        fetchTitle(vid).then(title => {
+          if (title) {
+            const t = ep.querySelector('.ep-title');
+            if (t) t.textContent = title;
+          }
+        }).catch(() => {});
+      }
+
+      renderWatchedStates();
+      highlightCurrentEpisode();
+    }
+
+    function syncPlaylist() {
+      try {
+        const currentPlaylist = player.getPlaylist() || [];
+        if (currentPlaylist.length !== playlistIds.length || currentPlaylist.join() !== playlistIds.join()) {
+          buildEpisodeListFromPlayer();
+        } else {
+          highlightCurrentEpisode();
+        }
+      } catch {}
+    }
+
+    // Corrigi aqui: usa o índice correto da playlist
+    function createEpisodeElement(number, videoId, playlistIndex) {
+      const wrap = document.createElement('div');
+      wrap.className = 'episode';
+      wrap.innerHTML = `
+        <div class='thumb'><img src='https://i.ytimg.com/vi/${videoId}/hqdefault.jpg' alt='thumb' onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTYwIDkwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxNjAiIGhlaWdodD0iOTAiIGZpbGw9IiMyMjIiIHJ4PSIxMCIvPjx0ZXh0IHg9IjgwIiB5PSI0NSIgZm9udC1zaXplPSIzMCIgZmlsbD0iI2FhYSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RXAg${number}</text></svg>'"><div class='watched' style='display:none'>✓ VISTO</div></div>
+        <div class='ep-meta'><div class='ep-title'>Episódio ${number}</div><div class='ep-sub'>Clique para assistir</div></div>
+        <div class='ep-number'>${number}</div>`;
+      
+      wrap.addEventListener('click', () => {
+        player.playVideoAt(playlistIndex); // Agora troca o episódio corretamente!
+        markWatched(videoId);
+        highlightCurrentEpisode();
+      });
+      
+      return wrap;
+    }
+
+    async function fetchTitle(videoId) {
+      try {
+        const res = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+        const j = await res.json();
+        return j.title || null;
+      } catch { return null; }
+    }
+
+    function renderWatchedStates() {
+      const w = readWatched();
+      document.querySelectorAll('#episodeList .episode').forEach(item => {
+        const img = item.querySelector('.thumb img');
+        const vid = img ? img.src.match(/vi\/([^\/]+)\//)?.[1] : null;
+        const badge = item.querySelector('.thumb .watched');
+        if (vid && w[vid]) {
+          badge.style.display = 'block';
+          item.style.opacity = '0.8';
+        } else {
+          badge.style.display = 'none';
+          item.style.opacity = '1';
+        }
+      });
+    }
+
+    window.addEventListener('beforeunload', markWatchedCurrent);
+    setInterval(() => { if (player?.getPlayerState() === YT.PlayerState.PLAYING) markWatchedCurrent(); }, 2000);
+
+    // Shaders
+    const canvas = document.getElementById('shaderCanvas');
+    const gl = canvas.getContext('webgl');
+    let shaderEnabled = true;
+    document.getElementById('toggleShaders').addEventListener('click', () => {
+      shaderEnabled = !shaderEnabled;
+      canvas.style.transition = 'opacity .3s';
+      canvas.style.opacity = shaderEnabled ? '0.9' : '0';
+      document.getElementById('toggleShaders').textContent = shaderEnabled ? 'Desligar shaders' : 'Ativar shaders';
+    });
+
+    function resizeCanvas() {
+      const rect = document.getElementById('player').getBoundingClientRect();
+      canvas.width = Math.max(1, Math.floor(rect.width - 24));
+      canvas.height = Math.max(1, Math.floor(rect.height - 24));
+      canvas.style.left = '12px'; canvas.style.top = '12px';
+      canvas.style.width = (rect.width - 24) + 'px'; canvas.style.height = (rect.height - 24) + 'px';
+    }
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 300);
+    if (!gl) canvas.style.display = 'none';
+
     const vs = `attribute vec2 position; varying vec2 vUv; void main(){ vUv = position*0.5+0.5; gl_Position = vec4(position,0.0,1.0); }`;
     const fs = `precision mediump float; varying vec2 vUv; uniform float iTime; uniform vec2 iResolution;
       float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123); }
       float noise(vec2 p){ vec2 i=floor(p); vec2 f=fract(p); float a=hash(i), b=hash(i+vec2(1.0,0.0)), c=hash(i+vec2(0.0,1.0)), d=hash(i+vec2(1.0,1.0)); vec2 u=f*f*(3.0-2.0*f); return mix(a,b,u.x)+ (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y; }
       void main(){ vec2 uv=vUv; float t=iTime*0.5; float n=noise(uv*6.0 + t*0.4);
-        vec3 base = vec3(0.0);
-        float dist = length(uv-vec2(0.5,0.5));
-        // much softer, wider glow
-        float gfall = smoothstep(0.9,0.0,dist); // inverse smoothstep for soft falloff
-        float puls = 0.35 + 0.2*sin(t*1.2 + uv.x*4.0);
-        vec3 glow = vec3(1.0,0.17,0.12) * gfall * 0.06 * puls * (0.5 + n*0.4);
-        vec3 col = base + glow;
-        // tiny chroma
-        col.r += n*0.01; col.g += n*0.005; col.b += n*0.0025;
-        // very faint scanlines
+        float dist = length(uv-vec2(0.5)); float gfall = smoothstep(0.9,0.0,dist);
+        float puls = 0.4 + 0.25*sin(t*1.2 + uv.x*4.0);
+        vec3 glow = vec3(1.0,0.2,0.15) * gfall * 0.08 * puls * (0.6 + n*0.5);
+        vec3 col = glow; col.r += n*0.012; col.g += n*0.006;
         float scan = 0.5 + 0.5*sin((uv.y*iResolution.y*0.35 + t*30.0));
-        col *= 1.0 - 0.006*(1.0-scan);
-        // compute alpha from intensity but keep it low
-        float luminance = dot(col, vec3(0.299,0.587,0.114));
-        float alpha = smoothstep(0.02, 0.35, luminance) * 0.28; // max ~0.28 alpha
-        col = clamp(col, 0.0, 0.8);
-        gl_FragColor = vec4(col, alpha);
+        col *= 1.0 - 0.008*(1.0-scan);
+        float alpha = smoothstep(0.02, 0.4, dot(col, vec3(0.299,0.587,0.114))) * 0.32;
+        gl_FragColor = vec4(clamp(col,0.0,0.9), alpha);
       }`;
 
-    function createShader(gl,type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; } return s; }
-    function createProgram(gl,vsSrc,fsSrc){ const vsS=createShader(gl,gl.VERTEX_SHADER,vsSrc); const fsS=createShader(gl,gl.FRAGMENT_SHADER,fsSrc); const p=gl.createProgram(); gl.attachShader(p,vsS); gl.attachShader(p,fsS); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(p)); return null; } return p; }
+    function createShader(gl,type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) return null; return s; }
+    function createProgram(gl,vsSrc,fsSrc){ const vsS=createShader(gl,gl.VERTEX_SHADER,vsSrc); const fsS=createShader(gl,gl.FRAGMENT_SHADER,fsSrc); const p=gl.createProgram(); gl.attachShader(p,vsS); gl.attachShader(p,fsS); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) return null; return p; }
 
     let program, posLoc, timeLoc, resLoc;
     if(gl){
-      // enable alpha blending so shader is overlay, not opaque
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
       program = createProgram(gl,vs,fs);
       const posBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,posBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
       posLoc = gl.getAttribLocation(program,'position'); timeLoc = gl.getUniformLocation(program,'iTime'); resLoc = gl.getUniformLocation(program,'iResolution');
@@ -185,11 +437,19 @@
     }
 
     let start = performance.now()/1000;
-    function renderLoop(){ if(gl && shaderEnabled){ resizeCanvas(); gl.viewport(0,0,canvas.width,canvas.height); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(program); const t = performance.now()/1000 - start; gl.uniform1f(timeLoc, t); gl.uniform2f(resLoc, canvas.width, canvas.height); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); } requestAnimationFrame(renderLoop); }
+    function renderLoop(){
+      if(gl && shaderEnabled){
+        resizeCanvas();
+        gl.viewport(0,0,canvas.width,canvas.height);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(program);
+        gl.uniform1f(timeLoc, performance.now()/1000 - start);
+        gl.uniform2f(resLoc, canvas.width, canvas.height);
+        gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      }
+      requestAnimationFrame(renderLoop);
+    }
     requestAnimationFrame(renderLoop);
-
-    setInterval(()=>{ try{ if(player && typeof player.getPlayerState === 'function'){ const st = player.getPlayerState(); if(st==YT.PlayerState.PLAYING){ markWatchedCurrent(); } } }catch(e){} },2000);
-
   </script>
 </body>
 </html>
